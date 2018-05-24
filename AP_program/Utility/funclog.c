@@ -21,7 +21,6 @@ Attribute:
 #include "funclog.h"
 #include <assert.h>
 #include <stdarg.h>
-#include <syslog.h>
 
 void funclog (const char *format,... )
 {	

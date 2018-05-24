@@ -13,13 +13,15 @@ EXE_NAME = AP_EXE
 INC = 
 INC += -Ilib/ 
 INC += -I.
-INC += -I$(STAGING_DIR)/usr/include 
+INC += -I$(STAGING_DIR)/usr/include
+INC += -I./Utility
+INC += -I./FW_control
 
 SRC = 
 #SRC += hello
 SRC += SampleCode_FW_control
-SRC += FW_control_mi 
-SRC += funclog
+SRC += ./FW_control/FW_control_mi 
+SRC += ./Utility/funclog
 
 LIB =
 LIB += -L$(STAGING_DIR)/usr/lib
