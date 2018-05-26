@@ -14,6 +14,7 @@
 
 #include "funclog.h"
 #include "common.h"
+#include "bitmap_tool.h"
 #define MAX_PAYLOAD 16
 
 typedef enum{
