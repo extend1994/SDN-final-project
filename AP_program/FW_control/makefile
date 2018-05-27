@@ -8,25 +8,20 @@ CC = ${ASUS_CROSS_COMPILER}gcc
 
 STAGING_DIR=/home/tomyhu1995/Documents/openwrt/OpenWrt-SDK-brcm47xx-mips74k_gcc-4.8-linaro_uClibc-0.9.33.2.Linux-x86_64/staging_dir/target-mipsel_74kc+dsp2_uClibc-0.9.33.2
 
-EXE_NAME = AP_EXE
+EXE_NAME = TEST_FW
 
 INC = 
 INC += -Ilib/ 
 INC += -I.
 INC += -I$(STAGING_DIR)/usr/include
-INC += -I./Utility
-INC += -I./FW_control
-INC += -I./Status_monitor/
-INC += -I./Controller_agent/
+INC += -I../Utility/
 
 SRC = 
-SRC += ./FW_control/FW_control_mi 
-SRC += ./Utility/funclog
-SRC += ./Utility/bitmap_tool
-SRC += ./Utility/parser
-SRC += ./Controller_agent/controller_agent
-SRC += ./Status_monitor/status_monitor
-SRC += ./main
+SRC += ./FW_control_mi 
+SRC += ../Utility/funclog
+SRC += ../Utility/bitmap_tool
+SRC += ../Utility/parser
+SRC += ./SampleCode_FW_control
 
 LIB =
 LIB += -L$(STAGING_DIR)/usr/lib
@@ -34,7 +29,6 @@ LIB += -L$(STAGING_DIR)/usr/lib
 LDFLAG =
 LDFLAG += -liwinfo
 LDFLAG += -luci
-LDFLAG += -lpthread
 
 SRC_FILES = ${addsuffix .c, ${SRC}}
 OBJ_FILES = ${addsuffix .o, ${SRC}}
