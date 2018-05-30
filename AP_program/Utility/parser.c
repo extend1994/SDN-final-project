@@ -129,11 +129,20 @@ PARSER_CODE parser_keep_alive(void){
 
 	return SUCCESS;
 }
-PARSER_CODE encode_keep_alive(void){
-	log_info("Enter %s\n", __FUNC__);
-	
-	log_info("Exit %s\n", __FUNC__);
-
+PARSER_CODE encode_keep_alive(uint8_t *message){
+	log_info("Enter %s\n",__FUNC__);
+	Header_t header;
+	header.ID = 0;
+	header.Type = KEEP_ALIVE_BACK;
+	header.Length = 0;
+	header.Bitmap = 0x00;
+	memset(header.payload, 0, MAX_PAYLOAD);
+	memset(message, 0, sizeof(uint8_t) * PRE_HEADER_SIZE);
+	if(!encode_header(message, header)){
+		log_error("error: encode_header\n");
+		return FAIL;
+	}
+	log_info("Exit %s\n",__FUNC__);
 	return SUCCESS;
 }
 

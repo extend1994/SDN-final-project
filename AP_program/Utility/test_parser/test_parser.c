@@ -110,6 +110,11 @@ int main(int argv, char **argc){
 
 	printf("--------------AP ID = %d-------------\n", AP_ID);
 	printf("-------------------------Hello back---------------------\n");
-
+	printf("************************keep alive back****************\n");
+	encode_keep_alive(message);
+	for(index = 0; index < PRE_HEADER_SIZE; index++){
+		log_debug("No.%d: 0x%x\n", index, (int)message[index]);
+	}
+	printf("************************keep alive back****************\n");
 	return 0;
 }

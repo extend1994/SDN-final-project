@@ -15,8 +15,11 @@
 #include "funclog.h"
 #include "common.h"
 #include "bitmap_tool.h"
+
 #define MAX_PAYLOAD 16
 #define PRE_HEADER_SIZE 4
+#define MAX PRE_HEADER_SIZE + MAX_PAYLOAD + 5
+
 typedef enum{
 	SUCCESS=1,
 	FAIL=0
@@ -27,8 +30,8 @@ typedef enum{
 #define	INIT_SET 0x03
 #define	STATUS_REPLY 0x04
 #define	SET 0x05
-#define	KEEP_AVILE 0x06
-#define	KEEP_AVILE_BACK 0x07
+#define	KEEP_ALIVE 0x06
+#define	KEEP_ALIVE_BACK 0x07
 
 #pragma pack(push)
 #pragma pack(1)
@@ -75,7 +78,7 @@ PARSER_CODE encode_status_reply(Header_t *heder, STATUS_REPLY_CONDITIONS_t statu
 PARSER_CODE parser_set(Header_t *header, SET_parameter_t *set_parameter);
 
 PARSER_CODE parser_keep_alive(void);
-PARSER_CODE encode_keep_alive(void);
+PARSER_CODE encode_keep_alive(uint8_t *message);
 
 PARSER_CODE parser_header(uint8_t *input, Header_t *header);
 PARSER_CODE encode_header(uint8_t *output, Header_t header);

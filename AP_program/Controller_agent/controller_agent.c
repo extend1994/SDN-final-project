@@ -28,11 +28,67 @@ void *initial_connection(void){
  * */ 
 void *controller_agent(void){
 	log_info("Enter %s\n", __FUNC__);
-	uint8_t message[MAX_PAYLOAD];
+	uint8_t message[MAX];
 
 	while(1){
 		recv(sockfd, message, MAX_PAYLOAD, 0);
-		log_debug("recv!!!\n");
+		log_info("RECV message!!!\n");
+		Header_t output_header;
+		parser_header(message, &output_header);
+		log_debug("ID: %d\n", (int)output_header.ID);
+		log_debug("Type: %d\n", (int)output_header.Type);
+		log_debug("Length: %d\n", (int)output_header.Length);
+		log_debug("Bitmap: 0x%x\n", (int)output_header.Bitmap);
+		int index;
+		for(index = 0; index< output_header.Length; index++){
+			log_debug("No. %d: %d\n", index,output_header.payload[index]);
+		}
+		if(output_header.ID != AP_ID){
+			log_info("Invalid AP ID %d\n", output_header.ID);
+			goto error_AP_ID;
+		}
+		switch(output_header.Type){
+			case HELLO_BACK:{
+				log_info("Hello back message\n");
+				if(parser_hello_back(message) == SUCCESS){
+					log_info("good hello back message\n");
+					conntected = 1; //connected.
+				}
+				break;
+			}
+			case INIT_SET:{
+				log_info("Initial setup message\n");
+				INIT_SET_parameter_t parameter;
+				parser_initial_set(&output_header, &parameter);
+				//TODO implement FW control
+				break;
+			}
+			case SET:{
+				log_info("Set up message\n");
+				SET_parameter_t set_parameter;
+				parser_set(&output_header, &set_parameter);
+				//TODO implement FW control
+				break;
+			}
+			case KEEP_ALIVE:{
+				log_info("Keep alive message\n");
+				//send keep alive back message to controller immediately
+				uint8_t send_message[PRE_HEADER_SIZE] = {0};
+				encode_keep_alive(send_message);
+				if(send(sockfd, send_message, PRE_HEADER_SIZE, 0) != PRE_HEADER_SIZE){
+					log_error("Fail to send\n");
+					goto error;
+				}
+				break;
+			}
+			default:{
+				log_info("No good type 0x%x\n", output_header.Type);
+			        break;
+			}
+		}	
+		
+		error:
+		error_AP_ID:
 		memset(message, 0, MAX_PAYLOAD * sizeof(uint8_t));
 	}
 
