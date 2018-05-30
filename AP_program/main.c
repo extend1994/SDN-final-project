@@ -13,6 +13,7 @@
 #include "status_monitor.h"
 #include "funclog.h"
 
+
 int main(void){
 	log_info("Enter %s\n", __FUNC__);
 	log_info("Well come to AP program\n");
@@ -25,7 +26,7 @@ int main(void){
 		log_error("socket_initial error\n");
 		return -1;
 	}
-
+	
 	pthread_t agent, monitor;
 
 	if(pthread_create(&agent, NULL, controller_agent, NULL)){
@@ -43,5 +44,8 @@ int main(void){
 	pthread_join(agent, NULL);
 	pthread_join(monitor, NULL);
 	
+
+
+		
 	return 0;
 }

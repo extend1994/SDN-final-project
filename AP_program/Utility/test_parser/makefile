@@ -8,7 +8,7 @@ STAGING_DIR=/home/tomyhu1995/Documents/openwrt/OpenWrt-SDK-15.05.1-ramips-mt7620
 
 #STAGING_DIR=/home/tomyhu1995/Documents/openwrt/OpenWrt-SDK-brcm47xx-mips74k_gcc-4.8-linaro_uClibc-0.9.33.2.Linux-x86_64/staging_dir/target-mipsel_74kc+dsp2_uClibc-0.9.33.2
 
-EXE_NAME = TEST
+EXE_NAME = TEST_UTILITY
 
 INC = 
 INC += -Ilib/ 

@@ -17,8 +17,15 @@
 #define controller_ip "10.0.0.1"
 #define controller_port 8899
 
+/* 
+ * Socket file descriptor
+ */
 extern int sockfd;
 
+/*
+ * To record the system is connected to controller or not
+ */
+extern int connected;
 /*
  * child thread
  * */

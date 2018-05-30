@@ -16,7 +16,7 @@
 #include "common.h"
 #include "bitmap_tool.h"
 #define MAX_PAYLOAD 16
-
+#define PRE_HEADER_SIZE 4
 typedef enum{
 	SUCCESS=1,
 	FAIL=0
@@ -66,7 +66,7 @@ typedef struct status_reply_conditions{
 #pragma pack(pop)
 
 PARSER_CODE parser_hello_back(uint8_t *input);
-PARSER_CODE encode_hello(void);
+PARSER_CODE encode_hello(uint8_t *message);
 
 PARSER_CODE parser_initial_set(Header_t *header, INIT_SET_parameter_t *parameter);
 

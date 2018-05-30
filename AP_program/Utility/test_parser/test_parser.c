@@ -91,6 +91,25 @@ int main(int argv, char **argc){
 	for(index = 0; index< output_header.Length; index++){
 		log_debug("No. %d: %d\n", index,output_header.payload[index]);
 	}
-	printf("===========================status reply==============================\n");	
+	printf("===========================status reply==============================\n");
+	printf("**************************Hello**************************\n");		
+	memset(message, 0, sizeof(uint8_t) * sizeof(Header_t));
+	encode_hello(message);
+	for(index = 0; index < sizeof(Header_t); index++){
+		log_debug("No.%d: 0x%x\n", index, (int)message[index]);
+	}
+	printf("**************************Hello**************************\n");		
+	printf("-------------------------Hello back---------------------\n");
+	header.ID = 5;
+	header.Type = 0x02;
+	header.Length = 0; 
+	header.Bitmap = 0x00;
+	encode_header(message, header);
+
+	parser_hello_back(message);
+
+	printf("--------------AP ID = %d-------------\n", AP_ID);
+	printf("-------------------------Hello back---------------------\n");
+
 	return 0;
 }

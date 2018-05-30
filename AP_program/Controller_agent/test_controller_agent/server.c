@@ -10,7 +10,7 @@ int main(int argc , char *argv[])
 
 {
     //socket的建立
-    char inputBuffer[256] = {};
+    char inputBuffer[32] = {};
     char message[] = {"987654321"};
     int sockfd = 0,forClientSockfd = 0;
     sockfd = socket(AF_INET , SOCK_STREAM , 0);
@@ -32,12 +32,14 @@ int main(int argc , char *argv[])
 
     while(1){
         forClientSockfd = accept(sockfd,(struct sockaddr*) &clientInfo, &addrlen);
-                
-	while(1){
-		recv(forClientSockfd,inputBuffer,sizeof(inputBuffer),0);
-		printf("Get:%s\n",inputBuffer);
-
-		send(forClientSockfd,message,sizeof(message),0);
+        int recv_len;  
+	while((recv_len = recv(forClientSockfd,inputBuffer,sizeof(inputBuffer),0))){
+		int i = 0;
+		for(i = 0; i < recv_len; i++){
+			printf("0x%x  ", inputBuffer[i]);
+		}
+		printf("\n");
+		//send(forClientSockfd,message,sizeof(message),0);
 	 }
 	close(forClientSockfd);
     }

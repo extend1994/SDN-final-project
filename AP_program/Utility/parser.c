@@ -14,9 +14,20 @@ PARSER_CODE parser_hello_back(uint8_t *input){
 	}
 
 }
-PARSER_CODE encode_hello(void){
+
+PARSER_CODE encode_hello(uint8_t *message){
 	log_info("Enter %s\n",__FUNC__);
-	
+	Header_t header;
+	header.ID = 0;
+	header.Type = HELLO;
+	header.Length = 0;
+	header.Bitmap = 0x00;
+	memset(header.payload, 0, MAX_PAYLOAD);
+	memset(message, 0, sizeof(uint8_t) * sizeof(Header_t));
+	if(!encode_header(message, header)){
+		log_error("error: encode_header\n");
+		return FAIL;
+	}
 	log_info("Exit %s\n",__FUNC__);
 	return SUCCESS;
 }
@@ -146,12 +157,9 @@ PARSER_CODE parser_header(uint8_t *input, Header_t *header){
 
 PARSER_CODE encode_header(uint8_t *output, Header_t header){
 	log_info("Enter %s\n", __FUNC__);
-
+	memset(output, 0, sizeof(Header_t) * sizeof(uint8_t));
 	memcpy(output, &header, sizeof(Header_t));
-
-
 	log_info("Exit %s\n", __FUNC__);
-
 	return  SUCCESS;
 }
 

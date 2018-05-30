@@ -1,13 +1,33 @@
 #include "controller_agent.h"
 
+int conntected = 0;
 int sockfd = 0;
+
+void init_hello(void){
+	log_info("Enter %s\n", __FUNC__);
+	size_t size = sizeof(Header_t);
+	uint8_t *hello_message = (uint8_t *)malloc(sizeof(uint8_t) * size);
+	encode_hello(hello_message);
+	if(send(sockfd, hello_message, PRE_HEADER_SIZE, 0) != PRE_HEADER_SIZE){
+		log_error("Fail to send\n");	
+	}
+	free(hello_message);
+	log_info("Exit %s\n", __FUNC__);
+}
 
 /*
  * child thread
- * */
+ * */ 
 void *controller_agent(void){
 	log_info("Enter %s\n", __FUNC__);
 	uint8_t message[MAX_PAYLOAD];
+
+	while(!conntected){
+		log_info("Haven't connect to controller\n");
+		init_hello();		
+		sleep(1);
+	}
+
 	while(1){
 		recv(sockfd, message, MAX_PAYLOAD, 0);
 		memset(message, 0, MAX_PAYLOAD * sizeof(uint8_t));
