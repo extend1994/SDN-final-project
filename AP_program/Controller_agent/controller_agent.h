@@ -27,6 +27,11 @@ extern int sockfd;
  */
 extern int connected;
 /*
+ * connection thread
+ */
+void *initial_connection(void);
+
+/*
  * child thread
  * */
 void *controller_agent(void);

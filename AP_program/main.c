@@ -27,7 +27,7 @@ int main(void){
 		return -1;
 	}
 	
-	pthread_t agent, monitor;
+	pthread_t agent, monitor, connect;
 
 	if(pthread_create(&agent, NULL, controller_agent, NULL)){
 		log_error("Fail to create pthread\n");
@@ -41,9 +41,15 @@ int main(void){
 		log_debug("pthread_create agent\n");
 	}
 
+	if(pthread_create(&connect, NULL, initial_connection, NULL)){
+		log_error("Fail to create pthread\n");
+	}else{
+		log_debug("pthread_create agent\n");
+	}
+
 	pthread_join(agent, NULL);
 	pthread_join(monitor, NULL);
-	
+	pthread_join(connect, NULL);
 
 
 		

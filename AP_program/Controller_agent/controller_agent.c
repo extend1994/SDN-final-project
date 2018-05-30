@@ -15,6 +15,14 @@ void init_hello(void){
 	log_info("Exit %s\n", __FUNC__);
 }
 
+void *initial_connection(void){
+	while(!conntected){
+		log_info("Haven't connect to controller\n");
+		init_hello();		
+		sleep(1);
+	}
+}
+
 /*
  * child thread
  * */ 
@@ -22,16 +30,10 @@ void *controller_agent(void){
 	log_info("Enter %s\n", __FUNC__);
 	uint8_t message[MAX_PAYLOAD];
 
-	while(!conntected){
-		log_info("Haven't connect to controller\n");
-		init_hello();		
-		sleep(1);
-	}
-
 	while(1){
 		recv(sockfd, message, MAX_PAYLOAD, 0);
-		memset(message, 0, MAX_PAYLOAD * sizeof(uint8_t));
 		log_debug("recv!!!\n");
+		memset(message, 0, MAX_PAYLOAD * sizeof(uint8_t));
 	}
 
 	log_info("Exit %s\n", __FUNC__);
