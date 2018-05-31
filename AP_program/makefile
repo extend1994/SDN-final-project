@@ -18,6 +18,7 @@ INC += -I./Utility
 INC += -I./FW_control
 INC += -I./Status_monitor/
 INC += -I./Controller_agent/
+INC += -I./FW_agent/
 
 SRC = 
 SRC += ./FW_control/FW_control_mi 
@@ -26,6 +27,7 @@ SRC += ./Utility/bitmap_tool
 SRC += ./Utility/parser
 SRC += ./Controller_agent/controller_agent
 SRC += ./Status_monitor/status_monitor
+SRC += ./FW_agent/fw_agent
 SRC += ./main
 
 LIB =
@@ -46,4 +48,4 @@ ${EXE_NAME}: ${OBJ_FILES}
 ${OBJ_FILES} : %.o : %.c
 	${CC} ${CFLAGS} -c ${INC} $< -o $@ ${LDFLAG}
 clean:
-	rm ${OBJ_FILES} ${EXE_NAME}
+	rm -f ${OBJ_FILES} ${EXE_NAME} *.txt

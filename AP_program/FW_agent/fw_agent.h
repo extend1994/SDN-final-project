@@ -25,16 +25,16 @@
 #include <arpa/inet.h>
 #include "funclog.h"
 #include "FW_control_mi.h"
-
+#include "parser.h"
 
 /*
  * Set parameter to setup firmware
  */
-void firmwre_set(Header_t header, void *parameter);
+void firmware_set(Header_t header, void *parameter);
 
 /*
  * Request and get firmware status
  */ 
-void firmware_status_req(Header_t heder, STATUS_REPLY_CONDITIONS_t *status);
+void firmware_status_req(STATUS_REPLY_CONDITIONS_t *status);
 
 #endif

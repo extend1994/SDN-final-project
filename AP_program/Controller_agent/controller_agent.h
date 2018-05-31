@@ -13,6 +13,7 @@
 #include <netinet/in.h>
 #include "funclog.h"
 #include "parser.h"
+#include "fw_agent.h"
 
 #define controller_ip "10.0.0.1"
 #define controller_port 8899

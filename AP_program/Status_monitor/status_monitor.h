@@ -14,7 +14,9 @@
 #include "funclog.h"
 #include "parser.h"
 #include "controller_agent.h"
+#include "fw_agent.h"
 
+#define monitor_period 5
 /*
  * Child thread 
  * For status monitor

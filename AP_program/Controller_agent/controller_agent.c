@@ -60,14 +60,14 @@ void *controller_agent(void){
 				log_info("Initial setup message\n");
 				INIT_SET_parameter_t parameter;
 				parser_initial_set(&output_header, &parameter);
-				//TODO implement FW control
+				firmware_set(output_header, &parameter);
 				break;
 			}
 			case SET:{
 				log_info("Set up message\n");
 				SET_parameter_t set_parameter;
 				parser_set(&output_header, &set_parameter);
-				//TODO implement FW control
+				firmware_set(output_header, &set_parameter);
 				break;
 			}
 			case KEEP_ALIVE:{

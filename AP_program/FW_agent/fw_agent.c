@@ -3,15 +3,15 @@
 /*
  * Set parameter to setup firmware
  */
-void firmwre_set(Header_t header, void *parameter){
+void firmware_set(Header_t header, void *parameter){
 	log_info("Enter %s\n", __FUNC__);
 	char *ifname = "wlan1\0";
-	SET_paramter_t *set_ptr;
-	INITIAL_SET_parameter_t *init_set_ptr;
+	SET_parameter_t *set_ptr;
+	INIT_SET_parameter_t *init_set_ptr;
 
 	switch(header.Type){
-		case INIT_SET:{
-			init_set_ptr = (SET_paramter_t *)parameter;
+		case INIT_SET:
+			init_set_ptr = (INIT_SET_parameter_t *)parameter;
 			if(get_bit(header.Bitmap, 4)){
 				system_config.THSSTA = init_set_ptr->THSSTA;
 			}
@@ -30,11 +30,11 @@ void firmwre_set(Header_t header, void *parameter){
 				FW_ARGU argument;
 				argument.new_txpower = init_set_ptr->PWR;
 				FW_Control(ifname, 2, txpower, argument);
-			}	
+			}
+			system_config.initialized = 1;	
 			break;
-		}
-		case SET:{
-			set_ptr = (INITIAL_SET_parameter_t *)parameter;
+		case SET:
+			set_ptr = (SET_parameter_t *)parameter;
 			if(get_bit(header.Bitmap, 2)){
 				FW_ARGU argument;
 				argument.new_channel = set_ptr->CHN;
@@ -51,11 +51,9 @@ void firmwre_set(Header_t header, void *parameter){
 				FW_Control(ifname, 2, hidden, argument);
 			}
 			break;
-		}
-		default:{
+		default:
 			log_error("No good header type\n");
 			break;
-		}
 	}
 	log_info("Exit %s\n", __FUNC__);
 }
@@ -63,13 +61,13 @@ void firmwre_set(Header_t header, void *parameter){
 /*
  * Request and get firmware status
  */ 
-void firmware_status_req(Header_t header, STATUS_REPLY_CONDITIONS_t *status){
+void firmware_status_req(STATUS_REPLY_CONDITIONS_t *status){
 	log_info("Enter %s\n", __FUNC__);
 	memset(status, 0, sizeof(STATUS_REPLY_CONDITIONS_t));
 
-	int counter, number_of_AP, number_of_STA
+	int counter, number_of_AP, number_of_STA;
 	char *ifname = "wlan1\n";
-	const struct iwinfo_ops iw = iwinfo_backend(ifname);
+	const struct iwinfo_ops *iw = iwinfo_backend(ifname);
 	if (iw == NULL){
 	        log_error("iw == NULL\n");
 	}else{
@@ -100,8 +98,6 @@ void firmware_status_req(Header_t header, STATUS_REPLY_CONDITIONS_t *status){
 	status->AVGSNR = (uint8_t)avg_snr;
 	status->NUMSTA = (uint8_t)number_of_STA;
     	free(member); 
-
-
 
 	log_info("Exit %s\n", __FUNC__);
 }
