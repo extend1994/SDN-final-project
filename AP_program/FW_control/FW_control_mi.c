@@ -102,9 +102,15 @@ FW_CODE FW_Control(char *ifname, int radio_id, FW_COMMAND command, FW_ARGU argum
     			log_debug("Exit [%s]", __FUNC__);
     			return FW_FAIL_to_change_txpower;
     		}
-    		break;
+    		break;	
+	case hidden:
+		log_info("FW_Control command : hidden\n");
+		hidden_wifi(argument.hidden);
+		log_info("Exit %s\n", __FUNC__);
+		return FW_SEC;
+		break;
     	case disassociation:
-            log_debug("FW_Control command : disassociation");
+            	log_debug("FW_Control command : disassociation");
     		Disassociation(argument.disassociaiton_mac);
     		log_debug("Exit [%s]", __FUNC__);
     		return FW_SEC;
@@ -475,6 +481,24 @@ void uci_set_power_channel(int Power, int channel, int radio_id)
 	log_debug("Exit %s",__FUNC__);
 }
 
+/* hidden wifi
+ * input:
+ * 	1 = hidden wifi
+ * 	0 = broadcast wifi
+ */
+void hidden_wifi(int status){
+	log_info("Enter %s\n", __FUNC__);
+	char* uci_commit = "uci commit wireless";
+	char* wifiReboot = "wifi";
+	char command[100] = {0};
+	snprintf(command, sizeof(command), "uci set wireless.@wifi-iface[1].hidden=%d", status);
+	system(command);
+	system(uci_commit);
+	system(wifiReboot);
+	sleep(5);
+	log_info("Exit %s\n", __FUNC__);
+}
+
 void Disassociation(char *mac){
 	log_debug("Enter [%s]", __FUNC__);
 
@@ -501,7 +525,7 @@ assocMember* get_assoclist(const struct iwinfo_ops *iw, const char *ifname, int 
 	{
 		log_debug("iw == NULL");
 		assMem = (assocMember*)malloc(sizeof(assocMember));
-        memset(assMem, 0, sizeof(assocMember));//clear assMem to 0
+        	memset(assMem, 0, sizeof(assocMember));//clear assMem to 0
 		//assMem->bssid = strdup(myBSSID);
 		//assMem->ssid = strdup("");
 		//assMem->mac = strdup("");
@@ -517,7 +541,7 @@ assocMember* get_assoclist(const struct iwinfo_ops *iw, const char *ifname, int 
 		{	
 			log_debug("No information available");
 			assMem = (assocMember*)malloc(sizeof(assocMember));
-            memset(assMem, 0, sizeof(assocMember));//clear assMem to 0
+            		memset(assMem, 0, sizeof(assocMember));//clear assMem to 0
 			//assMem->bssid = strdup(myBSSID);
 			//assMem->ssid = strdup("");
 			//assMem->mac = strdup("");
@@ -534,7 +558,7 @@ assocMember* get_assoclist(const struct iwinfo_ops *iw, const char *ifname, int 
 			get_ssid(iw,ifname, ssid);
 			log_debug("No station connected in get assoclist len:%d",len);
 			assMem = (assocMember*)malloc(sizeof(assocMember));
-            memset(assMem, 0, sizeof(assocMember));//clear assMem to 0
+            		memset(assMem, 0, sizeof(assocMember));//clear assMem to 0
 			//assMem[index].bssid = (char *)malloc(sizeof(char) *  BSSID_LEN);
 			//get_bssid(iw, ifname, assMem[index].bssid);
 			//assMem->bssid = myBSSID;
@@ -555,7 +579,7 @@ assocMember* get_assoclist(const struct iwinfo_ops *iw, const char *ifname, int 
 			log_debug("There are some users");
 			*length = (len / sizeof(struct iwinfo_assoclist_entry)); 
 			assMem = (assocMember*)malloc(sizeof(assocMember)*(*length));
-            memset(assMem, 0, sizeof(assocMember)*(*length));//clear assMem to 0
+            		memset(assMem, 0, sizeof(assocMember)*(*length));//clear assMem to 0
 			/*get every assoclistInfo*/
 			for (i = 0, index=0; i < len, index < *length; i += sizeof(struct iwinfo_assoclist_entry),index++)
 			{
@@ -570,16 +594,16 @@ assocMember* get_assoclist(const struct iwinfo_ops *iw, const char *ifname, int 
 				//char rssi[SIGN_LEN];
 				//format_signal(e->signal, rssi);
 				assMem[index].bssid = (char *)malloc(sizeof(char) *  (BSSID_LEN+1));
-                memset(assMem[index].bssid, 0, sizeof(char) *  (BSSID_LEN+1));
+                		memset(assMem[index].bssid, 0, sizeof(char) *  (BSSID_LEN+1));
 				get_bssid(iw, ifname, assMem[index].bssid);
 				//assMem[index].bssid = myBSSID;
 
 				assMem[index].ssid = (char *)malloc(sizeof(char) * (IWINFO_ESSID_MAX_SIZE+1));
-                memset(assMem[index].ssid, 0, sizeof(char) * (IWINFO_ESSID_MAX_SIZE+1));
+		                memset(assMem[index].ssid, 0, sizeof(char) * (IWINFO_ESSID_MAX_SIZE+1));
 				snprintf(assMem[index].ssid, IWINFO_ESSID_MAX_SIZE+1, "%s", ssid);
 
 				assMem[index].mac = (char *)malloc(sizeof(char) * (BSSID_LEN+1));
-                memset(assMem[index].mac, 0, sizeof(char) * (BSSID_LEN+1));
+                		memset(assMem[index].mac, 0, sizeof(char) * (BSSID_LEN+1));
 				snprintf(assMem[index].mac, BSSID_LEN, "%s", bssid);
 
 				assMem[index].ip = (char *)malloc(sizeof(char) * (IP_LEN+1));
@@ -589,6 +613,9 @@ assocMember* get_assoclist(const struct iwinfo_ops *iw, const char *ifname, int 
 				//assMem[index].rssi = (char *)malloc(sizeof(char) * (SIGN_LEN+1));
 				//snprintf(assMem[index].rssi, SIGN_LEN, "%s", rssi);
 				assMem[index].rssi = e->signal;
+				assMem[index].noise = e->noise;
+				assMem[index].snr = (float)e->signal / e->noise;
+				assMem[index].num_of_packets = e->rx_packets + e->tx_packets;
 			}
 			log_debug("Exit [%s]\n", __FUNC__);
 			return assMem;

@@ -113,6 +113,9 @@ typedef struct assocMember
 	char *mac;
 	//char *rssi;
 	int rssi;
+	int noise;
+	float snr;
+	int num_of_packets;
 	char *ip;
 } assocMember;
 
@@ -130,13 +133,15 @@ typedef struct _fw_argu_{
 	int new_channel;
 	int new_txpower;
 	char *disassociaiton_mac;
+	int hidden;
 }FW_ARGU;
 
 typedef enum{
 	channel = 1,
 	txpower = 2,
 	disassociation = 3,
-	ALL = 4
+	hidden = 4,
+	ALL = 5
 }FW_COMMAND;
 
 typedef enum{
@@ -199,6 +204,12 @@ assocMember* get_assoclist(const struct iwinfo_ops *iw, const char *ifname, int*
 /*uci*/
 void uci_set_power_channel(int Power, int channel, int radio_id);
 void Disassociation(char *mac);
+/* hidden wifi
+ * input:
+ * 	1 = hidden wifi
+ * 	0 = broadcast wifi
+ */
+void hidden_wifi(int status);
 ap_status get_ap_status(const struct iwinfo_ops *iw, const char *ifname);
 
 #endif

@@ -73,6 +73,9 @@ int main(int argc, char const *argv[])
     argument.new_txpower = 20;//the struct to store arguments which you want to change.
     printf("FW control = %d\n", FW_Control(ifname, 2, txpower, argument));    
 
+    argument.hidden = 0;
+    printf("FW control = %d\n", FW_Control(ifname, 2, hidden, argument));
+
     ap = get_ap_status(iw, ifname);
     printf("\n--------------------------------\n");
     printf("AP status : \n");

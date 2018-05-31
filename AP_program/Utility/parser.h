@@ -63,7 +63,7 @@ typedef struct initial_set_parameter SET_parameter_t;
 typedef struct status_reply_conditions{
 	uint16_t SCHRES;//scanned channel results
 	uint8_t AVGSNR;//STA average SNR(to know who is interference)
-	uint8_t PKTCNT;//packet counts
+	uint32_t PKTCNT;//packet counts
 	uint8_t NUMSTA;//number of STA
 }STATUS_REPLY_CONDITIONS_t;
 #pragma pack(pop)
@@ -73,6 +73,7 @@ PARSER_CODE encode_hello(uint8_t *message);
 
 PARSER_CODE parser_initial_set(Header_t *header, INIT_SET_parameter_t *parameter);
 
+PARSER_CODE encode_status_reply_bit_map(Header_t *header, STATUS_REPLY_CONDITIONS_t *status);
 PARSER_CODE encode_status_reply(Header_t *heder, STATUS_REPLY_CONDITIONS_t status);
 
 PARSER_CODE parser_set(Header_t *header, SET_parameter_t *set_parameter);

@@ -68,23 +68,54 @@ PARSER_CODE parser_initial_set(Header_t *header, INIT_SET_parameter_t *parameter
 		
 }
 
+PARSER_CODE encode_status_reply_bit_map(Header_t *header, STATUS_REPLY_CONDITIONS_t *status){
+	log_info("Enter %s\n", __FUNC__);
+	if(status->SCHRES){
+		log_debug("SCHRES\n");
+		set_bit(&(header->Bitmap), 3);
+	}
+	if(status->AVGSNR){
+		log_debug("AVGSNR\n");
+		set_bit(&(header->Bitmap), 2);
+	}
+	if(status->PKTCNT){
+		log_debug("PKTCNT\n");
+		set_bit(&(header->Bitmap), 1);
+	}
+	if(status->NUMSTA){
+		log_debug("NUMSTA\n");
+		set_bit(&(header->Bitmap), 0);
+	}
+	log_info("Exit %s\n", __FUNC__);
+	return SUCCESS;
+}
+
 PARSER_CODE encode_status_reply(Header_t *header, STATUS_REPLY_CONDITIONS_t status){
 	log_info("Enter %s\n", __FUNC__);
+	header->ID = AP_ID;
+	header->Type = STATUS_REPLY;
 	int payload_count = 0;
 	if(get_bit(header->Bitmap, 3)){
+		header->Length += 2;
 		header->payload[payload_count++] = (status.SCHRES >> 8) & 0xff;
 		header->payload[payload_count++] = status.SCHRES & 0xff;
 	}
 
 	if(get_bit(header->Bitmap, 2)){
+		header->Length++;
 		header->payload[payload_count++] = status.AVGSNR;
 	}
 
 	if(get_bit(header->Bitmap, 1)){
-		header->payload[payload_count++] = status.PKTCNT;
+		header->Length += 4;
+		header->payload[payload_count++] = (status.PKTCNT >> 24) & 0xff;
+		header->payload[payload_count++] = (status.PKTCNT >> 16) & 0xff;
+		header->payload[payload_count++] = (status.PKTCNT >> 8) & 0xff;
+		header->payload[payload_count++] = status.PKTCNT & 0xff;
 	}
 
 	if(get_bit(header->Bitmap, 0)){
+		header->Length++;
 		header->payload[payload_count++] = status.NUMSTA;
 	}
 	int i;

@@ -13,6 +13,11 @@
 #include "status_monitor.h"
 #include "funclog.h"
 
+void initial_system_config(void){
+	system_config.THSSTA = 0;
+	system_config.THSSNR = 0;
+	system_config.THSPKC = 0;
+}
 
 int main(void){
 	log_info("Enter %s\n", __FUNC__);
@@ -21,6 +26,7 @@ int main(void){
 	log_info("This program is made by HsienWen Hu and AnnTasi\n");
 	log_info("Have Fun !! SDN X wifi\n");
 
+	initial_system_config();
 
 	if(!socket_initial()){
 		log_error("socket_initial error\n");

@@ -62,27 +62,25 @@ int main(int argv, char **argc){
 	log_debug("BEACON = %d\n", set_parameter.BEACON);
 	printf("*********************************set**********************************\n");
 	printf("============================status reply==============================\n");
-	header.ID = 7;
-	header.Type = 0x04;
-	header.Length = 3;
-	header.Bitmap = 0x09;
-
+	AP_ID = 9;	
+	memset(&header, 0, sizeof(header));
 	STATUS_REPLY_CONDITIONS_t status;
 	memset(&status, 0, sizeof(STATUS_REPLY_CONDITIONS_t));
+	status.PKTCNT = 0x11223344;
 	status.SCHRES = 0x3101;
 	status.NUMSTA = 3;
+	encode_status_reply_bit_map(&header, &status);
 	encode_status_reply(&header, status);
 	encode_header(message, header);
-
-	for(index = 0; index < header.Length; index++){
-		log_debug("%x\n", header.payload[index]);
-	}
-
-	encode_header(message, header);
-
-	for(index = 0; index < header.Length + 5; index++){
+	log_debug("Raw data\n");
+	
+	for(index = 0; index < PRE_HEADER_SIZE; index++){
 		log_debug("%x\n", message[index]);
 	}
+	for(index = PRE_HEADER_SIZE; index < PRE_HEADER_SIZE + header.Length; index++){
+		log_debug("%x\n", message[index]);
+	}
+
 	parser_header(message, &output_header);
 	log_debug("ID: %d\n", (int)output_header.ID);
 	log_debug("Type: %d\n", (int)output_header.Type);
