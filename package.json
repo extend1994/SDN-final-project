@@ -18,6 +18,7 @@
   "homepage": "https://github.com/extend1994/SDN-final-project#readme",
   "dependencies": {
     "bitset": "^5.0.3",
+    "buffer-hexdump": "^1.0.0",
     "convert-hex": "^0.1.0",
     "pad": "^2.1.0",
     "signale": "^1.1.0"
