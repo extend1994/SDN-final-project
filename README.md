@@ -1,17 +1,6 @@
 # SDN-final-project
 
-## Auto configure AP's radio parameters and power saving
+## Informations of our design
+* You can get more about our design from: https://hackmd.io/S-9iuvCgRZO8W0YXIjCEaw
+* Slides: https://docs.google.com/presentation/d/1OU4yTnuxKSSMQ2HYCY8feAHUzXWNDlrR_-zI4PokPZ0/edit?usp=sharing
 
-### Target
-1. 避免干擾 interference avoidence
-    1. 頻道指派
-    2. 發射功率調整
-2. 省電 Power saving
-    1. 調整功率
-    2. 關閉 idle 的 AP
-
-### TODO
-1. 行程表 schedule
-    1. 設計架構 Architecture design
-    2. 設計 Protocol
-    3. 實作與測試 Implementation & Testing
