@@ -22,5 +22,15 @@
     "convert-hex": "^0.1.0",
     "pad": "^2.1.0",
     "signale": "^1.1.0"
+  },
+  "signale": {
+    "displayScope": false,
+    "displayBadge": true,
+    "displayDate": false,
+    "displayFilename": true,
+    "displayLabel": true,
+    "displayTimestamp": true,
+    "underlineLabel": true,
+    "underlineMessage": false
   }
 }
