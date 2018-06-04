@@ -66,10 +66,13 @@ void firmware_status_req(STATUS_REPLY_CONDITIONS_t *status){
 	memset(status, 0, sizeof(STATUS_REPLY_CONDITIONS_t));
 
 	int counter, number_of_AP, number_of_STA;
-	char *ifname = "wlan1\n";
-	const struct iwinfo_ops *iw = iwinfo_backend(ifname);
+	char *ifname = "wlan1\0";
+	const struct iwinfo_ops *iw;
+
+	iw = iwinfo_backend(ifname);
 	if (iw == NULL){
 	        log_error("iw == NULL\n");
+		goto error;
 	}else{
 	        log_debug("iw != NULL\n");
 	}
@@ -92,7 +95,11 @@ void firmware_status_req(STATUS_REPLY_CONDITIONS_t *status){
 		packets += (int)member[counter].num_of_packets;
 		avg_snr += (int)member[counter].snr;
 	}
-	avg_snr /= number_of_STA;
+	if(number_of_STA){
+		avg_snr /= number_of_STA;
+	}else{
+		avg_snr = 0;
+	}
 
 	status->PKTCNT = (uint32_t)packets;
 	status->AVGSNR = (uint8_t)avg_snr;
@@ -100,6 +107,9 @@ void firmware_status_req(STATUS_REPLY_CONDITIONS_t *status){
     	free(member); 
 
 	log_info("Exit %s\n", __FUNC__);
+
+error:
+	log_error("Exit %swith error\n", __FUNC__);
 }
 
 

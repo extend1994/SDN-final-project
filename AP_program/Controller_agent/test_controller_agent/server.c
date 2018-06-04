@@ -39,7 +39,7 @@ int main(int argc , char *argv[])
 			printf("0x%x  ", inputBuffer[i]);
 		}
 		printf("\n");
-		send(forClientSockfd,message,sizeof(message),0);
+		//send(forClientSockfd,message,sizeof(message),0);
 	 }
 	close(forClientSockfd);
     }
