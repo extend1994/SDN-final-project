@@ -9,11 +9,12 @@
 #define MAX PRE_HEADER_SIZE + MAX_PAYLOAD + 5
 
 uint8_t AP_ID;
+uint8_t mtx;
 
 typedef struct{
 	uint8_t THSSTA;//Threshold of station number
 	uint8_t THSSNR;//Threshold of SNR
-	uint8_t THSPKC;//Threshold of packet counts
+	uint32_t THSPKC;//Threshold of packet counts
 	uint8_t initialized;
 }SYSTEM_CONFIG;
 

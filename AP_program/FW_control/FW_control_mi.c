@@ -265,7 +265,7 @@ int get_txpower(const struct iwinfo_ops *iw, const char *ifname)
     if (iw->txpower(ifname, &pwr))
 		pwr = -1;
 
-	log_debug("Tx power = %d", pwr);
+	log_debug("Tx power = %d\n", pwr);
 	log_debug("Exit %s\n",__FUNC__);
 	return pwr;
 }
@@ -284,19 +284,19 @@ int get_band(const struct iwinfo_ops *iw, const char *ifname){
 	 	freq = -1;
 	}
 
-	log_debug("frequency = %d", freq);
+	log_debug("frequency = %d\n", freq);
 	freq = freq / GHZ;
 	if(freq == 2){//2.4GHz
-		log_info("2.4GHz band");
-		log_info("Exit [%s]", __FUNC__);
+		log_info("2.4GHz band\n");
+		log_info("Exit [%s]\n", __FUNC__);
 		return TWO_DOT_FOUR_BAND;
 	}else if(freq == 5){//5GHz
-		log_info("5GHz band");
-		log_info("Exit [%s]", __FUNC__);
+		log_info("5GHz band\n");
+		log_info("Exit [%s]\n", __FUNC__);
 		return FIVE_BAND;
 	}else{
-		log_debug("Not valid band ");
-		log_info("Exit [%s]", __FUNC__);
+		log_error("Not valid band\n");
+		log_error("Exit [%s]\n", __FUNC__);
 		return -1;
 	}
 
@@ -457,7 +457,7 @@ ap_status get_ap_status(const struct iwinfo_ops *iw, const char *ifname)
 
 void uci_set_power_channel(int Power, int channel, int radio_id)
 {
-	log_debug("Enter %s",__FUNC__);
+	log_debug("Enter %s\n",__FUNC__);
     char uci_set_power[100] = {0};
     char uci_set_channel[100] = {0};
     char* uci_commit = "uci commit wireless";
@@ -468,17 +468,17 @@ void uci_set_power_channel(int Power, int channel, int radio_id)
 
     
     
-    log_debug("power command = %s, execute !", uci_set_power);
+    log_debug("power command = %s, execute !\n", uci_set_power);
 	system(uci_set_power);
-    log_debug("channel command = %s, execute", uci_set_channel);
+    log_debug("channel command = %s, execute\n", uci_set_channel);
 	system(uci_set_channel);
-    log_debug("uci_commit command = %s, execute", uci_commit);
+    log_debug("uci_commit command = %s, execute\n", uci_commit);
 	system(uci_commit);
-    log_debug("reboot command = %s, execute", wifiReboot);
+    log_debug("reboot command = %s, execute\n", wifiReboot);
 	system(wifiReboot);
-    log_debug("sleep ~~~");
+    log_debug("sleep ~~~\n");
 	sleep(5);
-	log_debug("Exit %s",__FUNC__);
+	log_debug("Exit %s\n",__FUNC__);
 }
 
 /* hidden wifi
@@ -612,6 +612,7 @@ assocMember* get_assoclist(const struct iwinfo_ops *iw, const char *ifname, int 
 				//get_station_ip(assMem[index].mac, assMem[index].ip);
 				//assMem[index].rssi = (char *)malloc(sizeof(char) * (SIGN_LEN+1));
 				//snprintf(assMem[index].rssi, SIGN_LEN, "%s", rssi);
+				log_debug("signal %d, noise %d\n", e->signal, e->noise);
 				assMem[index].rssi = e->signal;
 				assMem[index].noise = e->noise;
 				assMem[index].snr = (float)e->signal / e->noise;

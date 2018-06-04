@@ -2,7 +2,7 @@
 
 PARSER_CODE parser_hello_back(uint8_t *input){
 	log_info("Enter %s\n", __FUNC__);
-	AP_ID = input[0];
+	AP_ID = input[PRE_HEADER_SIZE];
 	if(AP_ID == 0){
 		log_error("something wrong, back ID\n");
 		log_error("Exit %s with fail\n", __FUNC__);
@@ -47,7 +47,11 @@ PARSER_CODE parser_initial_set(Header_t *header, INIT_SET_parameter_t *parameter
 
 	if(get_bit(header->Bitmap, 2)){
 		log_debug("Get THSPKC\n");
-		parameter->THSPKC = header->payload[payload_count++];
+		parameter->THSPKC = 0;
+		parameter->THSPKC += (header->payload[payload_count++] << 24) & 0xff000000;
+		parameter->THSPKC += (header->payload[payload_count++] << 16) & 0x00ff0000;
+		parameter->THSPKC += (header->payload[payload_count++] << 8)  & 0x0000ff00;
+		parameter->THSPKC += (header->payload[payload_count++]) 	     & 0x000000ff;
 	}
 
 	if(get_bit(header->Bitmap, 1)){
@@ -163,7 +167,7 @@ PARSER_CODE parser_keep_alive(void){
 PARSER_CODE encode_keep_alive(uint8_t *message){
 	log_info("Enter %s\n",__FUNC__);
 	Header_t header;
-	header.ID = 0;
+	header.ID = AP_ID;
 	header.Type = KEEP_ALIVE_BACK;
 	header.Length = 0;
 	header.Bitmap = 0x00;

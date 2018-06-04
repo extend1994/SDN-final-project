@@ -10,10 +10,16 @@ int main(int argv, char **argc){
 	printf("------------------------------initial set------------------------------\n");	
 	header.ID = 7;
 	header.Type = 0x03;
-	header.Length = 2;
-	header.Bitmap = 0x09;
-	header.payload[0] = 0x43;
-	header.payload[1] = 0x11;
+	header.Length = 8;
+	header.Bitmap = 0x1f;
+	header.payload[0] = 0x03;
+	header.payload[1] = 0x43;
+	header.payload[2] = 0x00;
+	header.payload[3] = 0x00;
+	header.payload[4] = 0x27;
+	header.payload[5] = 0x10;
+	header.payload[6] = 0x0a;
+	header.payload[7] = 0x11;
 	encode_header(message, header);
 
 	parser_header(message, &output_header);

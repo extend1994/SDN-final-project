@@ -48,7 +48,7 @@ typedef struct header{
 typedef struct initial_set_parameter{
 	uint8_t THSSTA;//Threshold of station number
 	uint8_t THSSNR;//Threshold of SNR
-	uint8_t THSPKC;//Threshold of packet counts
+	uint32_t THSPKC;//Threshold of packet counts
 	uint8_t BEACON;//connection permission
 	uint8_t CHN;//Channel
 	uint8_t PWR;//Power

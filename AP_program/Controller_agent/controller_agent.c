@@ -21,6 +21,7 @@ void *initial_connection(void){
 		init_hello();		
 		sleep(1);
 	}
+	log_info("Exit %s\n", __FUNC__);
 }
 
 /*
@@ -46,7 +47,7 @@ void *controller_agent(void){
 			}
 			if(output_header.ID != AP_ID){
 				log_info("Invalid AP ID %d\n", output_header.ID);
-				goto error_AP_ID;
+				log_error("Exit with error\n");
 			}
 			switch(output_header.Type){
 				case HELLO_BACK:{
@@ -78,7 +79,7 @@ void *controller_agent(void){
 					encode_keep_alive(send_message);
 					if(send(sockfd, send_message, PRE_HEADER_SIZE, 0) != PRE_HEADER_SIZE){
 						log_error("Fail to send\n");
-						goto error;
+						log_error("Exit with error\n");
 					}
 					break;
 				}
@@ -88,9 +89,7 @@ void *controller_agent(void){
 				}
 			}	
 			
-			error:
-			error_AP_ID:
-			memset(message, 0, MAX_PAYLOAD * sizeof(uint8_t));
+				
 		}else{
 			log_info("Loss connection, bye ~~~~~\n");
 			exit(1);

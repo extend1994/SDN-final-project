@@ -70,31 +70,31 @@ extern char *__progname;
 #define LOG_ARGS(LOG_TAG)   LOG_TAG, _FILE,__LINE__ , __FUNCTION__
 
 #if LOG_LEVEL >= DEBUG_LEVEL
-#define log_debug(message, args...)     PRINTFUNCTION(LOG_FMT message , LOG_ARGS(DEBUG_TAG), ## args)
+#define log_debug(message, args...)     PRINTFUNCTION(LOG_FMT message , LOG_ARGS(DEBUG_TAG), ## args, NEWLINE)
 #else
 #define log_debug(message, args...)
 #endif
 
 #if LOG_LEVEL >= INFO_LEVEL
-#define log_info(message, args...)      PRINTFUNCTION(LOG_FMT message, LOG_ARGS(INFO_TAG), ## args)
+#define log_info(message, args...)      PRINTFUNCTION(LOG_FMT message, LOG_ARGS(INFO_TAG), ## args, NEWLINE)
 #else
 #define log_info(message, args...)
 #endif
 
 #if LOG_LEVEL >= WARN_LEVEL
-#define log_warn(message, args...)      PRINTFUNCTION(LOG_FMT message, LOG_ARGS(WARN_TAG), ## args)
+#define log_warn(message, args...)      PRINTFUNCTION(LOG_FMT message, LOG_ARGS(WARN_TAG), ## args, NEWLINE)
 #else
 #define log_warn(message, args...)
 #endif
 
 #if LOG_LEVEL >= ERROR_LEVEL
-#define log_error(message, args...)     PRINTFUNCTION(LOG_FMT message, LOG_ARGS(ERROR_TAG), ## args)
+#define log_error(message, args...)     PRINTFUNCTION(LOG_FMT message, LOG_ARGS(ERROR_TAG), ## args, NEWLINE)
 #else
 #define log_error(message, args...)
 #endif
 
 #if LOG_LEVEL >= FATAL_LEVEL
-#define log_fatal(message, args...) 	PRINTFUNCTION(LOG_FMT message, LOG_ARGS(ERROR_TAG), ## args)
+#define log_fatal(message, args...) 	PRINTFUNCTION(LOG_FMT message, LOG_ARGS(ERROR_TAG), ## args, NEWLINE)
 #else
 #define log_fatal(message, args...)
 #endif

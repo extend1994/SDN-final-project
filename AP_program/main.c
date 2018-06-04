@@ -28,7 +28,8 @@ int main(void){
 	log_info("Enjoy the world of networking\n");
 	log_info("This program is made by HsienWen Hu and AnnTasi\n");
 	log_info("Have Fun !! SDN X wifi\n");
-
+	
+	mtx = 0;
 	initial_system_config();
 
 	if(!socket_initial()){
