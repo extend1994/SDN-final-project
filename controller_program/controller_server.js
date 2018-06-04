@@ -1,4 +1,5 @@
 const net = require('net');
+const parser = require('./parser');
 const {Signale} = require('signale');
 const options = {
   types: {
@@ -18,8 +19,9 @@ var server = net.createServer();
 server.on('connection', function(socket){
   log.watch('Connection from remote ' + socket.remoteAddress + ':' + socket.remotePort);
   socket.on('data', function(msg){
-    console.log(msg);
-    log.info(msg.toString());
+    var recv_data = Array.from(msg);
+    log.info(recv_data.toString());
+    parser.decode_header(recv_data);
   });
 });
 

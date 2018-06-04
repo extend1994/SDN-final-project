@@ -136,6 +136,9 @@ function hexToBin(hex, start, end) {
 
 function decode_header(recv_msg) {
 
+  if(recv_msg.constructor.toString().includes('Uint8Array')){
+    recv_msg = Array.from(recv_msg);
+  }
   decode_msg = hexconverter.bytesToHex(recv_msg);
   header.ID = hexToInt(decode_msg,0,2);
   header.type = hexToInt(decode_msg,2,4);
