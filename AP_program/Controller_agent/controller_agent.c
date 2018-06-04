@@ -28,9 +28,10 @@ void *initial_connection(void){
  * */ 
 void *controller_agent(void){
 	log_info("Enter %s\n", __FUNC__);
-	uint8_t message[MAX];
+	uint8_t message[25] = {0};
 
 	while(1){
+		memset(message, 0, sizeof(25));
 		recv(sockfd, message, MAX_PAYLOAD, 0);
 		log_info("RECV message!!!\n");
 		Header_t output_header;

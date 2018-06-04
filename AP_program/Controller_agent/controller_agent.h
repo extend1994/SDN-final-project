@@ -1,5 +1,3 @@
-
-
 #ifndef _CONTROLL_AGENT_H
 #define _CONTROLL_AGENT_H
 
@@ -14,6 +12,7 @@
 #include "funclog.h"
 #include "parser.h"
 #include "fw_agent.h"
+#include "common.h"
 
 #define controller_ip "10.0.0.1"
 #define controller_port 8899

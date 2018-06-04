@@ -1,13 +1,13 @@
-#MI_CROSS_COMPILER=/home/tomyhu1995/Documents/openwrt/OpenWrt-SDK-15.05.1-ramips-mt7620_gcc-4.8-linaro_uClibc-0.9.33.2.Linux-x86_64/staging_dir/toolchain-mipsel_24kec+dsp_gcc-4.8-linaro_uClibc-0.9.33.2/bin/mipsel-openwrt-linux-
+MI_CROSS_COMPILER=/home/tomyhu1995/Documents/openwrt/OpenWrt-SDK-15.05.1-ramips-mt7620_gcc-4.8-linaro_uClibc-0.9.33.2.Linux-x86_64/staging_dir/toolchain-mipsel_24kec+dsp_gcc-4.8-linaro_uClibc-0.9.33.2/bin/mipsel-openwrt-linux-
 #CC = ${MI_CROSS_COMPILER}gcc
 
-ASUS_CROSS_COMPILER=/home/tomyhu1995/Documents/openwrt/OpenWrt-SDK-brcm47xx-mips74k_gcc-4.8-linaro_uClibc-0.9.33.2.Linux-x86_64/staging_dir/toolchain-mipsel_74kc+dsp2_gcc-4.8-linaro_uClibc-0.9.33.2/bin/mipsel-openwrt-linux-
+#ASUS_CROSS_COMPILER=/home/tomyhu1995/Documents/openwrt/OpenWrt-SDK-brcm47xx-mips74k_gcc-4.8-linaro_uClibc-0.9.33.2.Linux-x86_64/staging_dir/toolchain-mipsel_74kc+dsp2_gcc-4.8-linaro_uClibc-0.9.33.2/bin/mipsel-openwrt-linux-
+
+STAGING_DIR=/home/tomyhu1995/Documents/openwrt/OpenWrt-SDK-15.05.1-ramips-mt7620_gcc-4.8-linaro_uClibc-0.9.33.2.Linux-x86_64/staging_dir/target-mipsel_24kec+dsp_uClibc-0.9.33.2
+
+#STAGING_DIR=/home/tomyhu1995/Documents/openwrt/OpenWrt-SDK-brcm47xx-mips74k_gcc-4.8-linaro_uClibc-0.9.33.2.Linux-x86_64/staging_dir/target-mipsel_74kc+dsp2_uClibc-0.9.33.2
+
 CC = ${ASUS_CROSS_COMPILER}gcc
-
-#STAGING_DIR=/home/tomyhu1995/Documents/openwrt/OpenWrt-SDK-15.05.1-ramips-mt7620_gcc-4.8-linaro_uClibc-0.9.33.2.Linux-x86_64/staging_dir/target-mipsel_24kec+dsp_uClibc-0.9.33.2
-
-STAGING_DIR=/home/tomyhu1995/Documents/openwrt/OpenWrt-SDK-brcm47xx-mips74k_gcc-4.8-linaro_uClibc-0.9.33.2.Linux-x86_64/staging_dir/target-mipsel_74kc+dsp2_uClibc-0.9.33.2
-
 EXE_NAME = AP_EXE
 
 INC = 

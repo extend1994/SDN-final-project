@@ -17,6 +17,8 @@ INC += -I../
 INC += -I../../Utility/
 INC += -I../../Controller_agent/
 INC += -I../../Status_monitor/
+INC += -I../../FW_agent/
+INC += -I../../FW_control/
 INC += -I$(STAGING_DIR)/usr/include
 
 SRC = 
@@ -25,6 +27,8 @@ SRC += ../../Utility/parser
 SRC += ../controller_agent
 SRC += ../../Status_monitor/status_monitor
 SRC += ../../Utility/bitmap_tool
+SRC += ../../FW_agent/fw_agent
+SRC += ../../FW_control/FW_control_mi
 SRC += ./test_controller_agent
 
 LIB =

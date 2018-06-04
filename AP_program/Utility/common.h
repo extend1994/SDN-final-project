@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include <stdint.h>
 
+#define MAX PRE_HEADER_SIZE + MAX_PAYLOAD + 5
+
 uint8_t AP_ID;
 
 typedef struct{

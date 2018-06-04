@@ -16,9 +16,8 @@
 #include "common.h"
 #include "bitmap_tool.h"
 
-#define MAX_PAYLOAD 16
+#define MAX_PAYLOAD 	16
 #define PRE_HEADER_SIZE 4
-#define MAX PRE_HEADER_SIZE + MAX_PAYLOAD + 5
 
 typedef enum{
 	SUCCESS=1,
