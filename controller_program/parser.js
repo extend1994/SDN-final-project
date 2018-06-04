@@ -1,3 +1,4 @@
+const net = require('net');
 const {Signale} = require('signale');
 var bitset = require('bitset');
 var hexconverter = require('convert-hex');
@@ -9,7 +10,12 @@ const options = {
       badge: '☢',
       color: 'yellowBright',
       label: 'debug'
-    }
+    },
+    info: {
+      badge: '📨',
+      color: 'blue',
+      label: 'recv_msg'
+    }   
   }
 };
 
@@ -86,12 +92,14 @@ function encode_hello_back() {
   message.ID = 0;
   message.type = hello_back_t;
   message.length = 1;
-  message.bitmap = 0x01;
+  message.bitmap = 0x02;
   message.payload.push(new_AP_ID);
   console.log(message);
 }
 
 function encode_initial_set(AP_ID) {
+
+  clean_message();
   message.ID = AP_ID;
   recorder[AP_ID-1].set_parameter.CHN = channel_set.includes(1) == false ? 1 :
                                       channel_set.includes(6) == false ? 6 : 11;
@@ -99,25 +107,39 @@ function encode_initial_set(AP_ID) {
   channel_set.push(recorder[AP_ID-1].set_parameter.CHN);
   recorder[AP_ID-1].set_parameter.THSSTA = 3;
   recorder[AP_ID-1].set_parameter.THSSNR = 0x43;
+  recorder[AP_ID-1].set_parameter.THSPKC = 10;
   recorder[AP_ID-1].set_parameter.PWR = 0x11;
   message.type = initial_set_t;
-  message.length = 4;
-  message.bitmap = 0x1B;
-  message.payload = [3, 0x43, channel_set[channel_set.length-1], 0x11];
+  message.length = 8;
+  message.bitmap = 0x1F;
+  message.payload = [3, 0x43, 0x00, 0x00, 0x00, 0x0A, channel_set[channel_set.length-1], 0x11];
 }
 
 function analyze_and_adjust_status() {
   //DO nothing for temporarily
 }
 
+function occupied_channel_report(){
+  for(var i = 0; i < 16; ){
+    var index = ap_condition.SCHRES.indexOf('1',i+1);
+    if(index == -1){
+      i = 16;
+    } else {
+      i = index;
+      var channel = 16 - index;
+      log.debug('channel ' + channel + ' is occupied!');
+    }
+  }
+}
+
 function encode_set(AP_ID) {
+  clean_message();
   message.ID = AP_ID;
   recorder[AP_ID-1].set_parameter.PWR = 20;
-  recorder[AP_ID-1].set_parameter.BEACON = 1;
   message.type = set_t;
   message.length = 2;
-  message.bitmap = 0x03;
-  message.payload.push([20,1]);
+  message.bitmap = 0x06;
+  message.payload = [6,20];
 }
 
 function encode_keep_alive(AP_ID) {
@@ -134,7 +156,19 @@ function hexToBin(hex, start, end) {
   return bitset.fromHexString(hex.slice(start,end)).toString();
 }
 
-function decode_header(recv_msg) {
+function encode_msg(){
+  var msg = [];
+  msg.push(message.ID);
+  msg.push(message.type);
+  msg.push(message.length);
+  msg.push(message.bitmap);
+  for(var i=0;i<message.payload.length;i++){
+    msg.push(message.payload[i]);
+  }
+  return new Buffer(msg);
+}
+
+function decode_header(recv_msg, socket) {
 
   if(recv_msg.constructor.toString().includes('Uint8Array')){
     recv_msg = Array.from(recv_msg);
@@ -150,28 +184,28 @@ function decode_header(recv_msg) {
   }
 
   // Checking payload values
-  for(var i = 0; i < header.payload.length; i++){
-    log.debug("payload: " + header.payload[i]);
-  }
+  //for(var i = 0; i < header.payload.length; i++){
+  //  log.debug("payload: " + header.payload[i]);
+  //}
 
+  var send_msg;
   switch (header.type) {
 
     case hello_t:
       log.info("Decoded as a hello message");
       if (header.ID == 0) {
         encode_hello_back();
-        // TCP send hello back msg
-        //log.debug("Hello back message");
-        //console.log(message);
+        send_msg = encode_msg();
+        socket.write(send_msg);
         var AP_ID = message.payload[message.payload.length-1];
-        clean_message();
         encode_initial_set(AP_ID);
-        //log.debug("Init set message");
-        //console.log(message);
-        // TCP send initial set msg
+        send_msg = encode_msg();
+        socket.write(send_msg);
         encode_keep_alive(AP_ID);
-        //log.debug("Keep alive message");
-        //console.log(message);
+	send_msg = encode_msg();
+	log.pause("Waiting for keep alive msg...");
+	setTimeout(function(){socket.write(send_msg)}, 5000);
+	setTimeout(function(){log.debug("Emit keep alive message!!")}, 5000);
       } else {
         log.error("Hello message with wrong ID or type");
         log.error("Tell AP to hello again?");
@@ -183,6 +217,7 @@ function decode_header(recv_msg) {
       log.info("Decoded as a status reply message");
       if (header.ID != 0) {
         if (header.bitmap.charAt(4)  == "1") {
+	  ap_condition.SCHRES = "";
           for(var i=0; i<2; i++){
             var extract_byte = pad(8,header.payload[0].toString(2),'0');
             ap_condition.SCHRES += extract_byte; //Becomes a bitmap
@@ -207,10 +242,14 @@ function decode_header(recv_msg) {
         if (header.bitmap.charAt(7)  == "1") {
           ap_condition.NUMSTA = header.payload[0];
         }
+	log.debug("------ ap_condition -------");
         console.log(ap_condition);
+        occupied_channel_report();
         recorder[header.ID-1].condition = ap_condition;
         analyze_and_adjust_status();
         encode_set(header.ID);
+	send_msg = encode_msg();
+        socket.write(send_msg);
       } else {
         log.error("Status reply should NOT bring ID = 0");
       }
@@ -220,10 +259,11 @@ function decode_header(recv_msg) {
       log.info("Decoded as a keep alive reply message");
       if (header.ID != 0 && header.length == 0 && header.bitmap == "00000000") {
         log.success("AP is still alive!");
-        //setTimeout(encode_keep_alive, 30000, header.ID);
-        if(test_flag) encode_keep_alive(header.ID);
-
-        test_flag = 0;
+	encode_keep_alive(header.ID);
+	send_msg = encode_msg();
+	log.pause("Waiting for keep alive msg...");
+	setTimeout(function(){socket.write(send_msg)}, 30000);
+	setTimeout(function(){log.debug("Emit keep alive message!!")}, 30000);
       } else {
         log.error("Alive rpy should NOT bring ID = 0 or non-zero length or bitmap");
       }
@@ -234,6 +274,28 @@ function decode_header(recv_msg) {
   }
   clean_header();
 }
+
+var host = process.argv[2] || '0.0.0.0';
+var port = process.argv[3] || 8899;
+var server = net.createServer();
+
+server.on('connection', function(socket){
+  log.watch('Connection from remote ' + socket.remoteAddress + ':' + socket.remotePort);
+  socket.on('data', function(msg){
+    var recv_data = Array.from(msg);
+    log.info(recv_data.toString());
+    decode_header(recv_data, socket);
+  });
+
+  socket.on('end', function(test){
+    console.log(test);
+    log.debug('lose connection!');
+  }) 
+});
+
+
+server.listen(port,host);
+log.start("Controller is listening on " + host + ":" + port);
 
 module.exports = {
   decode_header: decode_header
