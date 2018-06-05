@@ -90,6 +90,23 @@ function clean_message() {
   message.payload = [];
 }
 
+function length_cal(type, input){
+
+  var payload_len = 0;
+  if (input[0]) payload_len++;
+  if (input[1]) {
+    if (type == 3) payload_len += 4; //THSSNR needs 4 bytes
+    else payload_len ++; //PWR only needs 1 bytes
+  }
+  if (input[2]) payload_len++;
+  if (type == 3) {
+    if (input[3]) payload_len++;
+    if (input[4]) payload_len++; 
+  }
+
+  return payload_len;
+}
+
 function encode_hello_back() {
 
   var new_AP_ID = recorder.push({
@@ -108,18 +125,35 @@ function encode_initial_set(AP_ID) {
 
   clean_message();
   message.ID = AP_ID;
-  recorder[AP_ID-1].set_parameter.CHN = channel_set.includes(1) == false ? 1 :
-                                      channel_set.includes(6) == false ? 6 : 11;
-
-  channel_set.push(recorder[AP_ID-1].set_parameter.CHN);
-  recorder[AP_ID-1].set_parameter.THSSTA = 3;
-  recorder[AP_ID-1].set_parameter.THSSNR = 0x43;
-  recorder[AP_ID-1].set_parameter.THSPKC = 10;
-  recorder[AP_ID-1].set_parameter.PWR = 0x11;
+  /* Initial set */
+  recorder[AP_ID-1].initial_parameter.CHN = 
+    channel_set.includes(1) ==  false ? 1 :
+    channel_set.includes(6) ==  false ? 6 : 
+    channel_set.includes(11) == false ? 11 :
+    channel_set[Math.floor(Math.random() * channel_set.length)];
+  
+  recorder[AP_ID-1].initial_parameter.THSSTA = 1; // REMEMBER TO MODIFY IT WHEN DEMO
+  recorder[AP_ID-1].initial_parameter.THSSNR = 0x43;
+  recorder[AP_ID-1].initial_parameter.THSPKC = 100;
+  if (channel_set.length) recorder[AP_ID-1].initial_parameter.PWR = 3;
+  else recorder[AP_ID-1].initial_parameter.PWR = 20;
+  channel_set.push(recorder[AP_ID-1].initial_parameter.CHN);
+  /* End of initial set */
+  var init_prmt = recorder[AP_ID-1].initial_parameter;
+  log.debug('== Recorder == ' + JSON.stringify(recorder[AP_ID-1]));
+  /* message encoding */
   message.type = initial_set_t;
-  message.length = 8;
-  message.bitmap = 0x1F;
-  message.payload = [3, 0x43, 0x00, 0x00, 0x00, 0x0A, channel_set[channel_set.length-1], 0x11];
+  message.length = length_cal(3, Object.values(init_prmt));
+  message.bitmap = 2; //CHN must be set
+  if (init_prmt.THSSTA) message.bitmap += 16;
+  if (init_prmt.THSSNR) message.bitmap += 8;
+  if (init_prmt.THSPKC) message.bitmap += 4;
+  if (init_prmt.PWR) message.bitmap += 1;
+  message.payload.push(init_prmt.THSSTA);
+  message.payload.push(init_prmt.THSSNR);
+  message.payload.push(0,0,0,init_prmt.THSPKC);
+  message.payload.push(init_prmt.CHN);
+  message.payload.push(init_prmt.PWR);
 }
 
 function analyze_and_adjust_status() {
