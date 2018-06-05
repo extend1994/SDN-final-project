@@ -1,21 +1,29 @@
+'use strict';
+
 const net = require('net');
 const {Signale} = require('signale');
 var bitset = require('bitset');
 var hexconverter = require('convert-hex');
 var pad = require('pad');
+var emoji = require('node-emoji');
 
 const options = {
   types: {
     debug: {
-      badge: '☢',
+      badge: emoji.get('radioactive_sign'),
       color: 'yellowBright',
       label: 'debug'
     },
     info: {
-      badge: '📨',
+      badge: emoji.get('envelope'),
       color: 'blue',
       label: 'recv_msg'
-    }   
+    },
+    view: {
+      badge: emoji.get('pencil2'),
+      color: 'cyan',
+      label: 'send_msg'
+    }
   }
 };
 
@@ -94,7 +102,6 @@ function encode_hello_back() {
   message.length = 1;
   message.bitmap = 0x02;
   message.payload.push(new_AP_ID);
-  console.log(message);
 }
 
 function encode_initial_set(AP_ID) {
@@ -170,10 +177,7 @@ function encode_msg(){
 
 function decode_header(recv_msg, socket) {
 
-  if(recv_msg.constructor.toString().includes('Uint8Array')){
-    recv_msg = Array.from(recv_msg);
-  }
-  decode_msg = hexconverter.bytesToHex(recv_msg);
+  var decode_msg = hexconverter.bytesToHex(recv_msg);
   header.ID = hexToInt(decode_msg,0,2);
   header.type = hexToInt(decode_msg,2,4);
   header.length = hexToInt(decode_msg,4,6);
@@ -182,12 +186,7 @@ function decode_header(recv_msg, socket) {
   for(var i = 0; i < header.length; i++){
     header.payload.push(hexToInt(decode_msg,8+i*2,10+i*2));
   }
-
-  // Checking payload values
-  //for(var i = 0; i < header.payload.length; i++){
-  //  log.debug("payload: " + header.payload[i]);
-  //}
-
+  
   var send_msg;
   switch (header.type) {
 
@@ -197,15 +196,21 @@ function decode_header(recv_msg, socket) {
         encode_hello_back();
         send_msg = encode_msg();
         socket.write(send_msg);
+        log.view("Hello back: " + JSON.stringify(message));
+
         var AP_ID = message.payload[message.payload.length-1];
         encode_initial_set(AP_ID);
         send_msg = encode_msg();
         socket.write(send_msg);
+        log.view("Initial Set: " + JSON.stringify(message));
+
         encode_keep_alive(AP_ID);
-	send_msg = encode_msg();
-	log.pause("Waiting for keep alive msg...");
-	setTimeout(function(){socket.write(send_msg)}, 5000);
-	setTimeout(function(){log.debug("Emit keep alive message!!")}, 5000);
+	      send_msg = encode_msg();
+
+      	setTimeout(function(){
+          socket.write(send_msg);
+          log.view("Keep alive: " + Array.from(send_msg));
+        }, 2000);
       } else {
         log.error("Hello message with wrong ID or type");
         log.error("Tell AP to hello again?");
@@ -214,10 +219,12 @@ function decode_header(recv_msg, socket) {
       break;
 
     case status_rpy_t:
+
       log.info("Decoded as a status reply message");
+
       if (header.ID != 0) {
         if (header.bitmap.charAt(4)  == "1") {
-	  ap_condition.SCHRES = "";
+          ap_condition.SCHRES = "";
           for(var i=0; i<2; i++){
             var extract_byte = pad(8,header.payload[0].toString(2),'0');
             ap_condition.SCHRES += extract_byte; //Becomes a bitmap
@@ -242,13 +249,14 @@ function decode_header(recv_msg, socket) {
         if (header.bitmap.charAt(7)  == "1") {
           ap_condition.NUMSTA = header.payload[0];
         }
-	log.debug("------ ap_condition -------");
-        console.log(ap_condition);
+
+      	log.debug("------ ap_condition -------");
+        log.debug(JSON.stringify(ap_condition));
         occupied_channel_report();
         recorder[header.ID-1].condition = ap_condition;
         analyze_and_adjust_status();
         encode_set(header.ID);
-	send_msg = encode_msg();
+      	send_msg = encode_msg();
         socket.write(send_msg);
       } else {
         log.error("Status reply should NOT bring ID = 0");
@@ -256,14 +264,18 @@ function decode_header(recv_msg, socket) {
       break;
 
     case alive_rpy_t:
+
       log.info("Decoded as a keep alive reply message");
       if (header.ID != 0 && header.length == 0 && header.bitmap == "00000000") {
+
         log.success("AP is still alive!");
-	encode_keep_alive(header.ID);
-	send_msg = encode_msg();
-	log.pause("Waiting for keep alive msg...");
-	setTimeout(function(){socket.write(send_msg)}, 30000);
-	setTimeout(function(){log.debug("Emit keep alive message!!")}, 30000);
+        encode_keep_alive(header.ID);
+        send_msg = encode_msg();
+
+        setTimeout(function(){
+          socket.write(send_msg);
+          log.view("Keep alive: " + Array.from(send_msg));
+        }, 30000);
       } else {
         log.error("Alive rpy should NOT bring ID = 0 or non-zero length or bitmap");
       }
@@ -275,6 +287,8 @@ function decode_header(recv_msg, socket) {
   clean_header();
 }
 
+
+/* Start a server and accept incoming connections */
 var host = process.argv[2] || '0.0.0.0';
 var port = process.argv[3] || 8899;
 var server = net.createServer();
@@ -288,8 +302,7 @@ server.on('connection', function(socket){
   });
 
   socket.on('end', function(test){
-    console.log(test);
-    log.debug('lose connection!');
+    log.debug('Lose connection of remote ' + socket.remoteAddress + ':' + socket.remotePort);
   }) 
 });
 

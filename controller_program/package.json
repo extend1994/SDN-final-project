@@ -20,6 +20,7 @@
     "bitset": "^5.0.3",
     "buffer-hexdump": "^1.0.0",
     "convert-hex": "^0.1.0",
+    "node-emoji": "^1.8.1",
     "pad": "^2.1.0",
     "signale": "^1.1.0"
   },
@@ -27,9 +28,9 @@
     "displayScope": false,
     "displayBadge": true,
     "displayDate": false,
-    "displayFilename": true,
+    "displayFilename": false,
     "displayLabel": true,
-    "displayTimestamp": true,
+    "displayTimestamp": false,
     "underlineLabel": true,
     "underlineMessage": false
   }
