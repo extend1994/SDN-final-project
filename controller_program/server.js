@@ -28,7 +28,6 @@ const options = {
 };
 
 const log = new Signale(options);
-var test_flag = 1;
 
 /* Global AP information */
 let header = {
@@ -42,6 +41,7 @@ let header = {
 let message = header;
 let channel_set = [];
 let recorder = []; //[{init_parameter, condition, set_parameter}]
+let socket_set = [];
 
 /* type definitions */
 let hello_t       = 0x01;
@@ -90,6 +90,13 @@ function clean_message() {
   message.payload = [];
 }
 
+function clean_ap_condition() {
+  ap_condition.SCHRES = "";
+  ap_condition.AVGSNR = 0;
+  ap_condition.PKTCNT = 0;
+  ap_condition.NUMSTA = 0;
+}
+
 function length_cal(type, input){
 
   var payload_len = 0;
@@ -108,6 +115,21 @@ function length_cal(type, input){
 }
 
 function encode_hello_back() {
+
+  initial_parameter.THSSTA = 0;
+  initial_parameter.THSSNR = 0;
+  initial_parameter.THSPKC = 0;
+  initial_parameter.CHN = 0;
+  initial_parameter.PWR = 0;
+
+  ap_condition.SCHRES = "";
+  ap_condition.AVGSNR = 0;
+  ap_condition.PKTCNT = 0;
+  ap_condition.NUMSTA = 0;
+
+  set_parameter.CHN = 0;
+  set_parameter.PWR = 0;
+  set_parameter.BEACON = 0;
 
   var new_AP_ID = recorder.push({
                                   initial_parameter: initial_parameter,
@@ -131,16 +153,17 @@ function encode_initial_set(AP_ID) {
     channel_set.includes(6) ==  false ? 6 : 
     channel_set.includes(11) == false ? 11 :
     channel_set[Math.floor(Math.random() * channel_set.length)];
-  
-  recorder[AP_ID-1].initial_parameter.THSSTA = 1; // REMEMBER TO MODIFY IT WHEN DEMO
+
+  recorder[AP_ID-1].initial_parameter.THSSTA = 1000; // TODO: REMEMBER TO MODIFY IT WHEN DEMO
   recorder[AP_ID-1].initial_parameter.THSSNR = 0x43;
-  recorder[AP_ID-1].initial_parameter.THSPKC = 100;
-  if (channel_set.length) recorder[AP_ID-1].initial_parameter.PWR = 3;
+  recorder[AP_ID-1].initial_parameter.THSPKC = 50; //TMP
+  if (channel_set.length > 0) recorder[AP_ID-1].initial_parameter.PWR = 3;
   else recorder[AP_ID-1].initial_parameter.PWR = 20;
   channel_set.push(recorder[AP_ID-1].initial_parameter.CHN);
   /* End of initial set */
   var init_prmt = recorder[AP_ID-1].initial_parameter;
-  log.debug('== Recorder == ' + JSON.stringify(recorder[AP_ID-1]));
+  log.debug('================= Initial recorder ' + AP_ID + ' =================');
+  log.debug(JSON.stringify(recorder[AP_ID-1]));
   /* message encoding */
   message.type = initial_set_t;
   message.length = length_cal(3, Object.values(init_prmt));
@@ -156,31 +179,99 @@ function encode_initial_set(AP_ID) {
   message.payload.push(init_prmt.PWR);
 }
 
-function analyze_and_adjust_status() {
-  //DO nothing for temporarily
-}
-
 function occupied_channel_report(){
+  var available = [1,2,3,4,5,6,7,8,9,10,11,12,13];
   for(var i = 0; i < 16; ){
+    //Search bitmap from index i+1
     var index = ap_condition.SCHRES.indexOf('1',i+1);
     if(index == -1){
       i = 16;
     } else {
       i = index;
       var channel = 16 - index;
-      log.debug('channel ' + channel + ' is occupied!');
+      //Remove array element from index i
+      available.splice(channel-1,1);
     }
   }
+  log.debug('Available channels: ' + Array.from(available).toString());
+  return available;
+}
+
+function analyze_and_adjust_status(cond,id) {
+
+  var parameter = {
+    CHN: 0,
+    PWR: 0,
+    BEACON: 0
+  };
+
+  /* Channel reallocate */
+  var available_channel = occupied_channel_report();
+  var collision;
+  var available_CHN1 = available_channel.indexOf(1)>=0 ? 1 : 0;
+  var available_CHN6 = available_channel.indexOf(6)>=0 ? 1 : 0;
+  var available_CHN11 = available_channel.indexOf(11)>=0 ? 1 : 0;
+  var set_CHN = recorder[id].set_parameter.CHN;
+  var init_CHN = recorder[id].initial_parameter.CHN;
+
+  // Check if current channel is the same as surrounding AP
+  // If the current channel can NOT be found in available channels, collision!
+  if (set_CHN > 0) collision = available_channel.indexOf(set_CHN) < 0 ? 1 : 0;
+  else collision = available_channel.indexOf(init_CHN) < 0 ? 1 : 0;
+
+  // When the same, pick channel 1/6/11 which is not in use, else random pick one
+  if (collision) {
+    log.warn('Collision! Current channel is either ' + set_CHN + ' or (init) ' + init_CHN);
+    parameter.CHN = available_CHN1 ? 1 :
+                        available_CHN6 ? 6 :
+                        available_CHN11? 11 :
+                        available_channel[Math.floor(Math.random() * available_channel.length)];
+    log.warn('New channel: ' + parameter.CHN);
+  }
+
+  /* For load balance and power saving, packet count is too much */
+  if (cond.PKTCNT > 0){
+    parameter.BEACON = 1; // TODO:Next should awake another AP
+  }
+
+  /* For power saving */
+  // No body is using but power is too much => power down
+  //if (cond.NUMSTA == 0) {
+  //  parameter.PWR = 3;
+  //}
+
+  return parameter;
 }
 
 function encode_set(AP_ID) {
   clean_message();
   message.ID = AP_ID;
-  recorder[AP_ID-1].set_parameter.PWR = 20;
+  var cond = recorder[AP_ID-1].condition;
+  var parameter = analyze_and_adjust_status(cond, AP_ID-1);
   message.type = set_t;
-  message.length = 2;
-  message.bitmap = 0x06;
-  message.payload = [6,20];
+  message.length = 0;
+  message.bitmap = 0;
+  if (parameter.CHN) {
+    recorder[AP_ID-1].set_parameter.CHN = parameter.CHN;
+    message.length += 1;
+    message.bitmap += 4;
+    message.payload.push(parameter.CHN);
+  }
+  if (parameter.PWR) {
+    recorder[AP_ID-1].set_parameter.PWR = parameter.PWR;
+    message.length += 1;
+    message.bitmap += 2;
+    message.payload.push(parameter.PWR);
+  }
+  //if (parameter.BEACON != recorder[AP_ID-1].set_parameter.BEACON) {
+  if (parameter.BEACON) {
+    recorder[AP_ID-1].set_parameter.BEACON = parameter.BEACON;
+    message.length +=1;
+    message.bitmap += 1;
+    message.payload.push(parameter.BEACON);
+  }
+  log.view('********************* set parameter *******************');
+  log.debug(JSON.stringify(parameter));
 }
 
 function encode_keep_alive(AP_ID) {
@@ -220,7 +311,10 @@ function decode_header(recv_msg, socket) {
   for(var i = 0; i < header.length; i++){
     header.payload.push(hexToInt(decode_msg,8+i*2,10+i*2));
   }
-  
+
+  if (recorder[header.ID-1]){
+  }
+
   var send_msg;
   switch (header.type) {
 
@@ -255,6 +349,7 @@ function decode_header(recv_msg, socket) {
     case status_rpy_t:
 
       log.info("Decoded as a status reply message");
+      clean_ap_condition();
 
       if (header.ID != 0) {
         if (header.bitmap.charAt(4)  == "1") {
@@ -284,14 +379,30 @@ function decode_header(recv_msg, socket) {
           ap_condition.NUMSTA = header.payload[0];
         }
 
-      	log.debug("------ ap_condition -------");
+        log.debug('----------------  ap_condition from AP '+ header.ID +'-----------------');
         log.debug(JSON.stringify(ap_condition));
-        occupied_channel_report();
         recorder[header.ID-1].condition = ap_condition;
-        analyze_and_adjust_status();
+        log.debug('================= Recorder ' + header.ID + ' BEFORE set =================');
+        log.debug(JSON.stringify(recorder[header.ID-1]));
         encode_set(header.ID);
+        log.debug('================= Recorder ' + header.ID + ' after set =================');
+        log.debug(JSON.stringify(recorder[header.ID-1]));
+        log.view("Go set: " + JSON.stringify(message));
       	send_msg = encode_msg();
         socket.write(send_msg);
+        /* Power up anther AP to load balance */
+        if (recorder[header.ID-1].set_parameter.BEACON == 1){
+          if (recorder[header.ID]) {
+            log.start("Wake up new AP!");
+            recorder[header.ID-1].set_parameter.PWR = 20; // No need to change CHN & BEACON
+            var msg = new Buffer([header.ID, set_t, 1, 2, 20]);
+            var next_ap_socket = socket_set[header.ID];
+            if (next_ap_socket) {
+              log.start('Socket exist! Wake Up!!');
+              next_ap_socket.write(msg);
+            }
+          }
+        }
       } else {
         log.error("Status reply should NOT bring ID = 0");
       }
@@ -333,6 +444,7 @@ server.on('connection', function(socket){
     var recv_data = Array.from(msg);
     log.info(recv_data.toString());
     decode_header(recv_data, socket);
+    socket_set.push(socket);
   });
 
   socket.on('end', function(test){
