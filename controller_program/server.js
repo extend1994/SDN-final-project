@@ -29,6 +29,12 @@ const options = {
 
 const log = new Signale(options);
 
+console.log("Usage: node server.js [<THSSTA> <THSSNR> <THSPKC>]");
+
+var THSSTA = (process.argv[2] != undefined) ? process.argv[2] : 1000;
+var THSSNR = (process.argv[3] != undefined) ? process.argv[3] : 0x43;
+var THSPKC = (process.argv[4] != undefined) ? process.argv[4] : 50;
+
 /* Global AP information */
 let header = {
   ID: 0,
@@ -154,9 +160,9 @@ function encode_initial_set(AP_ID) {
     channel_set.includes(11) == false ? 11 :
     channel_set[Math.floor(Math.random() * channel_set.length)];
 
-  recorder[AP_ID-1].initial_parameter.THSSTA = 1000; // TODO: REMEMBER TO MODIFY IT WHEN DEMO
-  recorder[AP_ID-1].initial_parameter.THSSNR = 0x43;
-  recorder[AP_ID-1].initial_parameter.THSPKC = 50; //TMP
+  recorder[AP_ID-1].initial_parameter.THSSTA = THSSTA; // argv
+  recorder[AP_ID-1].initial_parameter.THSSNR = THSSNR; // argv
+  recorder[AP_ID-1].initial_parameter.THSPKC = THSPKC; // argv
   if (channel_set.length > 0) recorder[AP_ID-1].initial_parameter.PWR = 3;
   else recorder[AP_ID-1].initial_parameter.PWR = 20;
   channel_set.push(recorder[AP_ID-1].initial_parameter.CHN);
@@ -434,8 +440,8 @@ function decode_header(recv_msg, socket) {
 
 
 /* Start a server and accept incoming connections */
-var host = process.argv[2] || '0.0.0.0';
-var port = process.argv[3] || 8899;
+var host = '0.0.0.0';
+var port = 8899;
 var server = net.createServer();
 
 server.on('connection', function(socket){
