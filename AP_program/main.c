@@ -20,6 +20,8 @@ void initial_system_config(void){
 	system_config.THSSNR = 0;
 	system_config.THSPKC = 0;
 	system_config.initialized = 0;
+	system_config.number_of_STA_upper_bound = 0;
+	system_config.BEACON = 0;
 }
 
 int main(void){

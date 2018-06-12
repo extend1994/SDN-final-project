@@ -1,5 +1,41 @@
 #include "fw_agent.h"
+/*
+ * manage stations
+ */
+void firmware_station_management(void){
+	log_info("Enter %s\n", __FUNC__);
 
+	int counter, number_of_STA;
+	char *ifname = "wlan1\0";
+	const struct iwinfo_ops *iw;
+	while(mtx){
+		//busy waiting
+		//log_debug("busy waiting\n");
+
+	}
+	mtx = 1;
+	iw = iwinfo_backend(ifname);
+	if (iw == NULL){
+	        log_error("iw == NULL\n");
+		goto error;
+	}else{
+	        log_debug("iw != NULL\n");
+	}
+
+	//Get STA list to fill avg. SNR, packet count, number of sta
+	assocMember *member = get_assoclist(iw,ifname,&number_of_STA);
+	log_debug("We have %d users\n", number_of_STA);	
+	for(counter = system_config.number_of_STA_upper_bound; counter < number_of_STA; counter++){
+		log_debug("New user mac: %s\n", member[counter].mac);
+		Disassociation(member[counter].mac);
+	}
+    	free(member); 
+	log_info("Exit %s\n", __FUNC__);
+error:
+	log_error("Exit %swith error\n", __FUNC__);
+	mtx = 0;
+	log_debug("release mtx\n");
+}
 /*
  * Set parameter to setup firmware
  */
@@ -11,7 +47,7 @@ void firmware_set(Header_t header, void *parameter){
 	
 	while(mtx){
 		//busy waiting
-		log_debug("busy waiting\n");
+		//log_debug("busy waiting\n");
 	}
 
 	mtx = 1;
@@ -41,20 +77,38 @@ void firmware_set(Header_t header, void *parameter){
 			break;
 		case SET:
 			set_ptr = (SET_parameter_t *)parameter;
-			if(get_bit(header.Bitmap, 2)){
-				FW_ARGU argument;
-				argument.new_channel = set_ptr->CHN;
-				FW_Control(ifname, 2, channel, argument);
+			if(get_bit(header.Bitmap, 0)){
+				//FW_ARGU argument;
+				//argument.hidden = set_ptr->BEACON;
+				//FW_Control(ifname, 2, hidden, argument);
+				int number_of_STA;
+				char *ifname = "wlan1\0";
+				const struct iwinfo_ops *iw;
+				iw = iwinfo_backend(ifname);
+				if (iw == NULL){
+					log_error("iw == NULL\n");
+				}else{
+					log_debug("iw != NULL\n");
+				}
+
+				//Get STA list to fill avg. SNR, packet count, number of sta
+				assocMember *member = get_assoclist(iw,ifname,&number_of_STA);
+				log_debug("We have %d users\n", number_of_STA);	
+				free(member);
+				system_config.BEACON = set_ptr->BEACON;
+				system_config.number_of_STA_upper_bound = number_of_STA;		
 			}
+		
 			if(get_bit(header.Bitmap, 1)){
 				FW_ARGU argument;
 				argument.new_txpower = set_ptr->PWR;
 				FW_Control(ifname, 2, txpower, argument);
 			}
-			if(get_bit(header.Bitmap, 0)){
+
+			if(get_bit(header.Bitmap, 2)){
 				FW_ARGU argument;
-				argument.hidden = set_ptr->BEACON;
-				FW_Control(ifname, 2, hidden, argument);
+				argument.new_channel = set_ptr->CHN;
+				FW_Control(ifname, 2, channel, argument);
 			}
 			break;
 		default:
@@ -78,7 +132,7 @@ void firmware_status_req(STATUS_REPLY_CONDITIONS_t *status){
 	const struct iwinfo_ops *iw;
 	while(mtx){
 		//busy waiting
-		log_debug("busy waiting\n");
+		//log_debug("busy waiting\n");
 
 	}
 	mtx = 1;

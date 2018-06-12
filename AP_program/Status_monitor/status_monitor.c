@@ -15,28 +15,35 @@ void *status_monitor(void){
 		memset(&status, 0, sizeof(STATUS_REPLY_CONDITIONS_t));
 		
 		firmware_status_req(&status);
+		log_debug("system_config.number_of_STA_upper_bound = %d\n", system_config.number_of_STA_upper_bound);
+		log_debug("system_config.BEACON = %d\n", system_config.BEACON);
+
+		if(system_config.number_of_STA_upper_bound && system_config.BEACON){
+			firmware_station_management();
+		}
+
 		if(system_config.initialized){
 			//log_debug("system_config.THSSTA = %d\n", system_config.THSSTA);
 			//log_debug("system_config.THSPKC = %d\n", system_config.THSPKC);
 			//log_debug("system_config.THSSNR = %d\n", system_config.THSSNR);
 			PKTCNT_delta = (uint32_t)((uint32_t)status.PKTCNT - last_packet);
 			log_debug("last count = %d, now count = %d, delta = %d\n", last_packet, status.PKTCNT, PKTCNT_delta);
-
-			if(status.NUMSTA <= system_config.THSSTA){
-				log_info("status.NUMSTA = %d\n", status.NUMSTA);
-				status.NUMSTA = 0;
-			}
-
+			
 			if(PKTCNT_delta <= system_config.THSPKC){
 				log_info("PKTCNT_delta = %d\n", PKTCNT_delta);
 				status.PKTCNT = 0;
 			}else{
 				log_info("PKTCNT_delta = %d\n", PKTCNT_delta);
-				if(status.PKTCNT > last_packet){
+				if(status.PKTCNT > last_packet && !system_config.BEACON){
 					status.PKTCNT = (uint8_t)PKTCNT_delta;
 				}else{
 					status.PKTCNT = 0;
 				}
+			}
+			
+			if(status.NUMSTA <= system_config.THSSTA){
+				log_info("status.NUMSTA = %d\n", status.NUMSTA);
+				status.NUMSTA = 0;
 			}
 
 			if(status.AVGSNR >= system_config.THSSNR){

@@ -28,6 +28,12 @@
 #include "parser.h"
 
 /*
+ * manage stations
+ */
+void firmware_station_management(void);
+
+
+/*
  * Set parameter to setup firmware
  */
 void firmware_set(Header_t header, void *parameter);

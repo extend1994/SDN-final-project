@@ -505,7 +505,7 @@ void Disassociation(char *mac){
 	char command[100];
 	bzero(command, sizeof(command));
 
-	snprintf(command, sizeof(command), "hostapd_cli disassociate %s", mac);
+	snprintf(command, sizeof(command), "iw wlan1 station del %s", mac);
 	system(command);
 
 	log_debug("Exit [%s]", __FUNC__);
