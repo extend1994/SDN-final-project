@@ -1,0 +1,37 @@
+{
+  "name": "sdn-final-project",
+  "version": "1.0.0",
+  "description": "Implement a controller in SDN final project",
+  "main": "parser-test.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/extend1994/SDN-final-project.git"
+  },
+  "author": "AnnTsai",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/extend1994/SDN-final-project/issues"
+  },
+  "homepage": "https://github.com/extend1994/SDN-final-project#readme",
+  "dependencies": {
+    "bitset": "^5.0.3",
+    "buffer-hexdump": "^1.0.0",
+    "convert-hex": "^0.1.0",
+    "node-emoji": "^1.8.1",
+    "pad": "^2.1.0",
+    "signale": "^1.1.0"
+  },
+  "signale": {
+    "displayScope": false,
+    "displayBadge": true,
+    "displayDate": false,
+    "displayFilename": false,
+    "displayLabel": true,
+    "displayTimestamp": false,
+    "underlineLabel": true,
+    "underlineMessage": false
+  }
+}
